@@ -30,7 +30,8 @@ public class SmoothWeightRoundRobin {
     public SmoothServer getServer() {
         SmoothServer tmpSv = null;
 
-        for (SmoothServer sv : this.servers) {
+        List<SmoothServer> smoothServers = this.servers;
+        for (SmoothServer sv : smoothServers) {
             sv.setCurWeight(sv.getWeight() + sv.getCurWeight());
             if (tmpSv == null || tmpSv.getCurWeight() < sv.getCurWeight()) {
                 tmpSv = sv;

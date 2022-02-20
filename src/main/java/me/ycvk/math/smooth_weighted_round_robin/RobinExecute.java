@@ -1,9 +1,12 @@
 package me.ycvk.math.smooth_weighted_round_robin;
 
+import cn.hutool.core.lang.Console;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.IntStream;
 
 /**
  * @author VERO
@@ -13,8 +16,11 @@ public class RobinExecute {
     /**
      * 线程使用完不会清除该变量,会一直保留着，由于线程 池化所以不用担心内存泄漏
      **/
-    private final ThreadLocal<SmoothWeightRoundRobin> weightRoundRobinTl = new ThreadLocal<SmoothWeightRoundRobin>();
+    private final ThreadLocal<SmoothWeightRoundRobin> weightRoundRobinTl = new ThreadLocal<>();
 
+    /**
+     * 可重入锁
+     **/
     private final ReentrantLock lock = new ReentrantLock();
 
     /**
@@ -32,7 +38,11 @@ public class RobinExecute {
         /* ==================    ReentrantLock 可重入锁   ========================*/
         robinExecute.getLock().lock();  //notice: 注意此锁会无休止的等待资源，如果使用此锁，无比保证资源能够被拿到
         try {
-            robinExecute.acquireWeightRoundRobinOfLock();
+            /*
+              7次输出服务器，理论上按权重轮询的顺序应该是：
+              194 192 194 191 194 192 194
+             */
+            IntStream.range(0, 7).mapToObj(i -> robinExecute.acquireWeightRoundRobinOfLock()).forEach(Console::log);
         } catch (Exception e) {
             e.printStackTrace();
         } finally { //确保一定要释放锁
